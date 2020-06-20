@@ -5,7 +5,6 @@ import bigInt from 'big-integer';
 import SpeciesConstructor from 'es-abstract/2019/SpeciesConstructor.js';
 import ToInteger from 'es-abstract/2019/ToInteger.js';
 import ToNumber from 'es-abstract/2019/ToNumber.js';
-import ToObject from 'es-abstract/2019/ToObject.js';
 import ToPrimitive from 'es-abstract/2019/ToPrimitive.js';
 import ToString from 'es-abstract/2019/ToString.js';
 
@@ -52,7 +51,6 @@ const ES2019 = {
   SpeciesConstructor,
   ToInteger,
   ToNumber,
-  ToObject,
   ToPrimitive,
   ToString
 };
@@ -1469,8 +1467,10 @@ export const ES = ObjectAssign({}, ES2019, {
   },
   ComparisonResult: (value) => (value < 0 ? -1 : value > 0 ? 1 : value),
   GetOption: (options, property, allowedValues, fallback) => {
-    if (options === null || options === undefined) return fallback;
-    options = ES.ToObject(options);
+    if (options === undefined) return fallback;
+    if (options === null || (typeof options !== 'object' && typeof options !== 'function')) {
+      throw new TypeError(`Options parameter must be an object, not a ${typeof options}`);
+    }
     let value = options[property];
     if (value !== undefined) {
       value = ES.ToString(value);
