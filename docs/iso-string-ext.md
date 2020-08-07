@@ -95,3 +95,8 @@ Since it is ambiguous whether that string represents a Date, YearMonth, or Month
 
 The ISO 8601 standard allows durations in units of weeks (`P3W` for three weeks), but weeks are not allowed to appear together with any other units.
 Temporal.Duration does support combining weeks with other units, so we propose the convention of strings such as `P3W1DT1H` for three weeks, one day, and one hour.
+
+## Duration signs
+
+Other popular datetime libraries, such as Moment.js, allow a single sign character (`+`, `-`, or the Unicode minus sign U+2122) to be prepended to an ISO 8601 duration string, to allow for negative durations.
+This is also supported in Temporal.Duration.
