@@ -152,8 +152,6 @@ export class Date {
     if (calendar.id !== GetSlot(other, CALENDAR).id) {
       other = new Date(GetSlot(other, ISO_YEAR), GetSlot(other, ISO_MONTH), GetSlot(other, ISO_DAY), calendar);
     }
-    const comparison = Date.compare(this, other);
-    if (comparison < 0) throw new RangeError('other instance cannot be larger than `this`');
     return calendar.dateDifference(other, this, options);
   }
   equals(other) {

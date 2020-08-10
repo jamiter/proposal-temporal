@@ -448,7 +448,7 @@ dt.minus({ months: 1 })  // => throws
 **Returns:** a `Temporal.Duration` representing the difference between `datetime` and `other`.
 
 This method computes the difference between the two times represented by `datetime` and `other`, and returns it as a `Temporal.Duration` object.
-A `RangeError` will be thrown if `other` is later than `datetime`, because `Temporal.Duration` objects cannot represent negative durations.
+If `other` is later than `datetime` then the resulting duration will be negative.
 
 The `largestUnit` option controls how the resulting duration is expressed.
 The returned `Temporal.Duration` object will not have any nonzero fields that are larger than the unit in `largestUnit`.
@@ -463,8 +463,8 @@ Usage example:
 dt1 = Temporal.DateTime.from('1995-12-07T03:24:30.000003500');
 dt2 = Temporal.DateTime.from('2019-01-31T15:30');
 dt2.difference(dt1);                            // =>    P8456DT12H5M29.999996500S
-dt2.difference(dt1), { largestUnit: 'years' })  // => P23Y1M24DT12H5M29.999996500S
-dt1.difference(dt2), { largestUnit: 'years' })  // => throws RangeError
+dt2.difference(dt1, { largestUnit: 'years' })  // => P23Y1M24DT12H5M29.999996500S
+dt1.difference(dt2, { largestUnit: 'years' })  // => -P23Y1M24DT12H5M29.999996500S
 
 // Months and years can be different lengths
 [jan1, feb1, mar1] = [1, 2, 3].map(month => Temporal.DateTime.from({year: 2020, month, day: 1}));
