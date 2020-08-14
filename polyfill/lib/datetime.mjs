@@ -361,8 +361,15 @@ export class DateTime {
   difference(other, options) {
     if (!ES.IsTemporalDateTime(this)) throw new TypeError('invalid receiver');
     if (!ES.IsTemporalDateTime(other)) throw new TypeError('invalid DateTime object');
-    const calendar = GetSlot(this, CALENDAR);
-    if (calendar.id !== GetSlot(other, CALENDAR).id) {
+    const thisCalendar = GetSlot(this, CALENDAR);
+    const otherCalendar = GetSlot(other, CALENDAR);
+    const calendar = ES.ChooseCommonCalendar(thisCalendar, otherCalendar);
+    if (!calendar) {
+      throw new RangeError(
+        `cannot compute difference between dates of ${thisCalendar.id} and ${otherCalendar.id} calendars`
+      );
+    }
+    if (calendar.id !== otherCalendar.id) {
       other = new DateTime(
         GetSlot(other, ISO_YEAR),
         GetSlot(other, ISO_MONTH),
@@ -389,7 +396,7 @@ export class DateTime {
     ({ year, month, day } = ES.BalanceDate(year, month, day));
 
     const TemporalDate = GetIntrinsic('%Temporal.Date%');
-    const adjustedLarger = new TemporalDate(year, month, day, GetSlot(this, CALENDAR));
+    const adjustedLarger = new TemporalDate(year, month, day, calendar);
     let dateLargestUnit = 'days';
     if (largestUnit === 'years' || largestUnit === 'months' || largestUnit === 'weeks') {
       dateLargestUnit = largestUnit;

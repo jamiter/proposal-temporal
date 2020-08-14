@@ -1,4 +1,5 @@
 import { GetIntrinsic } from './intrinsicclass.mjs';
+import { ES } from './ecmascript.mjs';
 import { TimeZone } from './timezone.mjs';
 
 const DATE = Symbol('date');
@@ -59,18 +60,11 @@ function resolvedOptions() {
 
 function adjustFormatterCalendar(formatter, calendar) {
   const options = formatter.resolvedOptions();
-  if (!calendar || calendar === options.calendar || calendar === 'gregory' || calendar === 'iso8601') return formatter;
-  const locale = `${options.locale}-u-ca-${calendar}`;
+  if (!calendar || calendar.id === options.calendar || calendar.id === 'gregory' || calendar.id === 'iso8601') {
+    return formatter;
+  }
+  const locale = `${options.locale}-u-ca-${calendar.id}`;
   return new IntlDateTimeFormat(locale, options);
-}
-
-function pickRangeCalendar(a, b) {
-  if (!a) return b;
-  if (!b) return a;
-  if (a === b) return a;
-  if (a === 'iso8601' || a === 'gregory') return b;
-  if (b === 'iso8601' || b === 'gregory') return a;
-  throw new RangeError(`cannot format range between two dates of ${a} and ${b} calendars`);
 }
 
 function format(datetime, ...rest) {
@@ -94,9 +88,14 @@ function formatRange(a, b) {
     if (Object.getPrototypeOf(a) !== Object.getPrototypeOf(b)) {
       throw new TypeError('Intl.DateTimeFormat accepts two values of the same type');
     }
-    const { absolute: aa, formatter: aformatter, calendar: acalendar } = extractOverrides(a, this);
-    const { absolute: bb, formatter: bformatter, calendar: bcalendar } = extractOverrides(b, this);
-    const calendar = pickRangeCalendar(acalendar, bcalendar);
+    const Calendar = GetIntrinsic('%Temporal.Calendar%');
+    const isoCalendar = Calendar.from('iso8601');
+    const { absolute: aa, formatter: aformatter, calendar: acalendar = isoCalendar } = extractOverrides(a, this);
+    const { absolute: bb, formatter: bformatter, calendar: bcalendar = isoCalendar } = extractOverrides(b, this);
+    const calendar = ES.ChooseCommonCalendar(acalendar, bcalendar);
+    if (!calendar) {
+      throw new RangeError(`cannot format range between two dates of ${acalendar} and ${bcalendar} calendars`);
+    }
     if (aa && bb && aformatter && bformatter && aformatter === bformatter) {
       const formatter = adjustFormatterCalendar(aformatter, calendar);
       return formatter.formatRange(aa.getEpochMilliseconds(), bb.getEpochMilliseconds());
@@ -110,9 +109,14 @@ function formatRangeToParts(a, b) {
     if (Object.getPrototypeOf(a) !== Object.getPrototypeOf(b)) {
       throw new TypeError('Intl.DateTimeFormat accepts two values of the same type');
     }
-    const { absolute: aa, formatter: aformatter, calendar: acalendar } = extractOverrides(a, this);
-    const { absolute: bb, formatter: bformatter, calendar: bcalendar } = extractOverrides(b, this);
-    const calendar = pickRangeCalendar(acalendar, bcalendar);
+    const Calendar = GetIntrinsic('%Temporal.Calendar%');
+    const isoCalendar = Calendar.from('iso8601');
+    const { absolute: aa, formatter: aformatter, calendar: acalendar = isoCalendar } = extractOverrides(a, this);
+    const { absolute: bb, formatter: bformatter, calendar: bcalendar = isoCalendar } = extractOverrides(b, this);
+    const calendar = ES.ChooseCommonCalendar(acalendar, bcalendar);
+    if (!calendar) {
+      throw new RangeError(`cannot format range between two dates of ${acalendar} and ${bcalendar} calendars`);
+    }
     if (aa && bb && aformatter && bformatter && aformatter === bformatter) {
       const formatter = adjustFormatterCalendar(aformatter, calendar);
       return formatter.formatRangeToParts(aa.getEpochMilliseconds(), bb.getEpochMilliseconds());
@@ -221,24 +225,24 @@ function extractOverrides(datetime, main) {
     formatter = main[TIME];
   }
   if (datetime instanceof YearMonth) {
-    calendar = datetime.calendar.id;
+    calendar = datetime.calendar;
     const { year, month, day } = datetime.getISOCalendarFields();
     datetime = new Date(year, month, day, datetime.calendar);
     formatter = main[YM];
   }
   if (datetime instanceof MonthDay) {
-    calendar = datetime.calendar.id;
+    calendar = datetime.calendar;
     const { year, month, day } = datetime.getISOCalendarFields();
     datetime = new Date(year, month, day, datetime.calendar);
     formatter = main[MD];
   }
   if (datetime instanceof Date) {
-    calendar = calendar || datetime.calendar.id;
+    calendar = calendar || datetime.calendar;
     datetime = datetime.toDateTime(new Time(12, 0));
     formatter = formatter || main[DATE];
   }
   if (datetime instanceof DateTime) {
-    calendar = calendar || datetime.calendar.id;
+    calendar = calendar || datetime.calendar;
     formatter = formatter || main[DATETIME];
     datetime = main[TIMEZONE].getAbsoluteFor(datetime);
   }

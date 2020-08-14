@@ -405,6 +405,25 @@ describe('DateTime', () => {
       equal(monthsDifference.weeks, 0);
       notEqual(monthsDifference.months, 0);
     });
+    it('no two different non-ISO calendars', () => {
+      const dt1 = new DateTime(2000, 1, 1, 0, 0, 0, 0, 0, 0, { id: 'discordian' });
+      const dt2 = new DateTime(2000, 1, 1, 0, 0, 0, 0, 0, 0, { id: 'french-republican' });
+      throws(() => dt1.difference(dt2), RangeError);
+    });
+    it('non-ISO calendar and ISO calendar is calculated in the non-ISO calendar', () => {
+      const calendar = {
+        id: 'faulty',
+        dateFromFields(fields, options, constructor) {
+          return new constructor(2000, 1, 1, this);
+        },
+        dateDifference() {
+          return new Temporal.Duration(10);
+        }
+      };
+      const dt1 = DateTime.from('2020-08-13T10:00');
+      const dt2 = DateTime.from({ year: 2020, month: 8, day: 13, hour: 9, calendar });
+      equal(`${dt1.difference(dt2)}`, 'P10YT1H');
+    });
   });
   describe('DateTime.from() works', () => {
     it('DateTime.from("1976-11-18 15:23:30")', () =>

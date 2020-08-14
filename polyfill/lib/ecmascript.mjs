@@ -895,6 +895,14 @@ export const ES = ObjectAssign({}, ES2019, {
       })
       .filter((x) => x !== undefined);
   },
+
+  ChooseCommonCalendar: (cal1, cal2) => {
+    if (cal1.id === cal2.id) return cal1;
+    if (cal1.id === 'iso8601' || cal1.id === 'gregory') return cal2;
+    if (cal2.id === 'iso8601' || cal2.id === 'gregory') return cal1;
+    return null;
+  },
+
   LeapYear: (year) => {
     if (undefined === year) return false;
     const isDiv4 = year % 4 === 0;

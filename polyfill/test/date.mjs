@@ -244,6 +244,25 @@ describe('Date', () => {
       equal(monthsDifference.weeks, 0);
       notEqual(monthsDifference.months, 0);
     });
+    it('no two different non-ISO calendars', () => {
+      const date1 = new Date(2000, 1, 1, { id: 'discordian' });
+      const date2 = new Date(2000, 1, 1, { id: 'french-republican' });
+      throws(() => date1.difference(date2), RangeError);
+    });
+    it('non-ISO calendar and ISO calendar is calculated in the non-ISO calendar', () => {
+      const calendar = {
+        id: 'faulty',
+        dateFromFields(fields, options, constructor) {
+          return new constructor(2000, 1, 1, this);
+        },
+        dateDifference() {
+          return new Temporal.Duration(10);
+        }
+      };
+      const date1 = Date.from('2020-08-13');
+      const date2 = Date.from({ year: 2020, month: 8, day: 13, calendar });
+      equal(`${date1.difference(date2)}`, 'P10Y');
+    });
   });
   describe('date.plus() works', () => {
     let date = new Date(1976, 11, 18);

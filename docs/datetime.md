@@ -454,6 +454,9 @@ However, a difference of 30 seconds will still be 30 seconds even if `largestUni
 By default, the largest unit in the result is days.
 This is because months and years can be different lengths depending on which month is meant and whether the year is a leap year.
 
+Computing the difference between two dates in different calendar systems is not supported.
+However, if one of the dates is in the ISO 8601 calendar and the other is not, the difference will be computed using the non-ISO calendar, in order to allow using an ISO date and time as a common reference point.
+
 Usage example:
 ```javascript
 dt1 = Temporal.DateTime.from('1995-12-07T03:24:30.000003500');
