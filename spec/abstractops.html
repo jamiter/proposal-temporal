@@ -662,9 +662,9 @@
       1. Let _z_, _sign_, _hour_, _minute_, and _name_ be the parts of _isoString_ produced respectively by the |UTCDesignator|, |TimeZoneUTCOffsetSign|, |TimeZoneUTCOffsetHour|, |TimeZoneUTCOffsetMinute| and |TimeZoneIANAName| productions, or *undefined* if not present.
       1. If _z_ is not *undefined*, then
         1. Return the new Record: {
-          [[OffsetSign]]: *undefined*,
-          [[OffsetHour]]: *undefined*,
-          [[OffsetMinute]]: *undefined*,
+          [[OffsetSign]]: 1,
+          [[OffsetHour]]: +0,
+          [[OffsetMinute]]: +0,
           [[Name]]: `"UTC"`
           }.
       1. If _hour_ is not *undefined*, then
